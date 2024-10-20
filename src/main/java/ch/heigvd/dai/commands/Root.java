@@ -1,5 +1,7 @@
 package ch.heigvd.dai.commands;
 
+import ch.heigvd.dai.ios.text.BufferedTextFileReader;
+import ch.heigvd.dai.ios.text.BufferedTextFileWriter;
 import com.deepl.api.*;
 import picocli.CommandLine;
 
@@ -16,10 +18,20 @@ public class Root implements Runnable {
     SPANISH,
     ITALIAN,
     GERMAN,
+    CHINESE
   }
 
-  @CommandLine.Parameters(index = "0", description = "The name of the file.")
-  protected String filename;
+  @CommandLine.Option(
+      names = {"-i", "--input"},
+      description = "The name of the input file.",
+      required = true)
+  protected String inputFilename;
+
+  @CommandLine.Option(
+      names = {"-o", "--output"},
+      description = "The name of the output file.",
+      required = true)
+  protected String outputFilename;
 
   @CommandLine.Option(
       names = {"-l", "--language"},
@@ -29,34 +41,36 @@ public class Root implements Runnable {
 
   @Override
   public void run() {
-    switch (languages) {
-      case FRENCH:
-        Translator translator = new Translator(API_KEY);
-        try {
-          TextResult result = translator.translateText("Hello, world!", null, "fr");
-          System.out.println(result.getText()); // "Bonjour, le monde !"
-        } catch (Exception e) {
+    Translator translator = new Translator(API_KEY);
+    try {
+      BufferedTextFileReader reader = new BufferedTextFileReader();
+      String[] sentences = reader.read(getInputFilename());
+      String[] targetLangs = {"fr", "es", "it", "de", "zh-hans"};
 
+      for (int i = 0; i < sentences.length; i++) {
+        TextResult result =
+            translator.translateText(sentences[i], "en", targetLangs[languages.ordinal()]);
+
+        if (result != null) {
+          sentences[i] = result.getText();
         }
+      }
 
-        break;
-      case SPANISH:
-        System.out.println("You selected SPANISH.");
-        break;
-      case ITALIAN:
-        System.out.println("You selected ITALIAN.");
-        break;
-      case GERMAN:
-        System.out.println("You selected GERMAN.");
-        break;
-      default:
-        System.out.println("Unknown language selected.");
-        break;
+      BufferedTextFileWriter writer = new BufferedTextFileWriter();
+      writer.reset(getOutputFilename());
+      writer.write(getOutputFilename(), sentences);
+
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
     }
   }
 
-  public String getFilename() {
-    return filename;
+  public String getInputFilename() {
+    return inputFilename;
+  }
+
+  public String getOutputFilename() {
+    return outputFilename;
   }
 
   public AvailableLanguages getImplementation() {

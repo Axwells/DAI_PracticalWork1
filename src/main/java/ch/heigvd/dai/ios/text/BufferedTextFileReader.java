@@ -22,7 +22,7 @@ public class BufferedTextFileReader implements Readable {
     StringBuilder sentence = new StringBuilder();
 
     try (Reader reader = new FileReader(filename, StandardCharsets.UTF_8);
-         BufferedReader br = new BufferedReader(reader)) {
+        BufferedReader br = new BufferedReader(reader)) {
 
       int c;
       while ((c = br.read()) != -1) {
