@@ -17,7 +17,7 @@ public class BufferedTextFileWriter implements Writable {
   @Override
   public void write(String filename, String[] sentences) {
     try (Writer writer = new FileWriter(filename, StandardCharsets.UTF_8, true);
-         BufferedWriter bw = new BufferedWriter(writer)) {
+        BufferedWriter bw = new BufferedWriter(writer)) {
 
       for (String sentence : sentences) {
         bw.write(sentence + ' ');
@@ -31,7 +31,7 @@ public class BufferedTextFileWriter implements Writable {
 
   public void reset(String filename) {
     try (Writer writer = new FileWriter(filename, StandardCharsets.UTF_8);
-         BufferedWriter bw = new BufferedWriter(writer)) {
+        BufferedWriter bw = new BufferedWriter(writer)) {
       bw.write("");
       bw.flush();
     } catch (IOException e) {
